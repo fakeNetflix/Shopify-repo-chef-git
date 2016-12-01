@@ -18,9 +18,10 @@ module ChefGit::BranchedDataBag
 
   def data_bag_changed?(data_bag)
     Dir.chdir(ChefGit::REPO_PATH) do
-      git_diff = Mixlib::ShellOut.new("git diff origin/master data_bags/#{data_bag}")
+      git_diff = Mixlib::ShellOut.new("git rev-list --left-right --count origin/master...HEAD data_bags/#{data_bag}")
       git_diff.run_command
-      unchanged = !git_diff.error? && git_diff.stdout.empty? && git_diff.stderr.empty?
+      _master, branched = git_diff.stdout.split(/\s+/).map(&:to_i)
+      unchanged = !git_diff.error? && branched == 0
       return !unchanged
     end
   end
