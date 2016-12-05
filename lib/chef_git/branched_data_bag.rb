@@ -8,7 +8,13 @@ module ChefGit::BranchedDataBag
     if chef_git_environment == 'master'
       return data_bag
     elsif data_bag_changed?(data_bag)
-      return "#{chef_git_environment}__#{data_bag}"
+      bag = "#{chef_git_environment}__#{data_bag}"
+      # Chef::DataBag.load returns an empty hash if the data bag is not on the server
+      if Chef::DataBag.load(bag).empty?
+        return data_bag
+      else
+        return bag
+      end
     else
       return data_bag
     end
